@@ -41,3 +41,24 @@ services:
     volumes:
       - ./data:/data
     command: ["python", "consumer.py"]
+
+  spark-streaming:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.spark
+    depends_on:
+      - kafka
+    working_dir: /app
+    volumes:
+      - ./src:/app/src:ro
+      - ./checkpoints:/app/checkpoints
+      - ./output:/app/output
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: wiki-events
+      SPARK_CHECKPOINT_DIR: /app/checkpoints/wiki
+    command: >
+      /opt/spark/bin/spark-submit
+      --master local[*]
+      /app/src/spark_streaming.py
+    restart: unless-stopped

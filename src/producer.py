@@ -13,7 +13,7 @@ from api_client import iter_recentchange_events
 load_dotenv()
 
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
-TOPIC = os.getenv("KAFKA_TOPIC", "wikimedia.recentchange")
+TOPIC = os.getenv("KAFKA_TOPIC", "wiki-events")
 CLIENT_ID = os.getenv("KAFKA_CLIENT_ID", "wikimeda-producer")
 
 

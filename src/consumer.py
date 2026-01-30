@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
-TOPIC = os.getenv("KAFKA_TOPIC", "wikimedia.recentchange")
+TOPIC = os.getenv("KAFKA_TOPIC", "wiki-events")
 GROUP_ID = os.getenv("KAFKA_GROUP_ID", "wikimeda-consumer-group")
 
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/data")
