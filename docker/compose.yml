@@ -145,9 +145,27 @@ services:
       --master local[*]
       /app/src/spark_streaming.py
     restart: unless-stopped
-    networks:
-      - wikimedia-network
+  # --------------------------
+# 백엔드 파트 docker 이미지 생성 및 redis
+# --------------------------
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_KEY=dashboard:latest
+    depends_on:
+      - redis
+      
 networks:
   wikimedia-network:
     driver: bridge
