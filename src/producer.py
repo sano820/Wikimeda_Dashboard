@@ -5,7 +5,7 @@ Producer
 import json
 import os
 import time
-from kafka import KafkaProducer
+from confluent_kafka import Producer
 from dotenv import load_dotenv
 
 from api_client import iter_recentchange_events
@@ -18,13 +18,14 @@ CLIENT_ID = os.getenv("KAFKA_CLIENT_ID", "wikimeda-producer")
 
 
 def main():
-    producer = KafkaProducer(
-        bootstrap_servers=KAFKA_BOOTSTRAP,
-        client_id=CLIENT_ID,
-        value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode("utf-8"),
-        acks="all",
-        retries=10,
-        linger_ms=50,
+    producer = Producer(
+        {
+            "bootstrap.servers": KAFKA_BOOTSTRAP,
+            "client.id": CLIENT_ID,
+            "acks": "all",
+            "retries": 10,
+            "linger.ms": 50,
+        }
     )
 
     print(f"[producer] bootstrap={KAFKA_BOOTSTRAP}, topic={TOPIC}")

@@ -5,7 +5,7 @@ Consumer
 import json
 import os
 from datetime import datetime
-from kafka import KafkaConsumer
+from confluent_kafka import Consumer
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -26,7 +26,7 @@ def main():
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_path = os.path.join(OUTPUT_DIR, f"recentchange_{ts}.jsonl")
 
-    consumer = KafkaConsumer(
+    consumer = Consumer(
         TOPIC,
         bootstrap_servers=KAFKA_BOOTSTRAP,
         group_id=GROUP_ID,

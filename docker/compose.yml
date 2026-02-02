@@ -4,13 +4,16 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - wikimedia-network
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"     # host에서 접근 필요하면
+      - "9092:9092" # host에서 접근 필요하면
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -23,36 +26,86 @@ services:
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - wikimedia-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: wiki-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: wiki-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - wikimedia-network
 
   producer:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
     depends_on:
       - kafka
     env_file:
-      - .env
+      - ../.env
     command: ["python", "producer.py"]
+    networks:
+      - wikimedia-network
 
   consumer:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
     depends_on:
       - kafka
     env_file:
-      - .env
+      - ../.env
     volumes:
       - ./data:/data
     command: ["python", "consumer.py"]
+    networks:
+      - wikimedia-network
+      
+  spark-master:
+    image: apache/spark:3.5.8
+    container_name: wiki-spark-master
+    hostname: spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    ports:
+      - "7077:7077"   # Master 포트 (Worker/Driver 연결용)
+      - "4040:4040"   # Spark Application UI (앱 실행 중에만)
+      - "8081:8080"   # Master Web UI
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_HOST: spark-master
+      SPARK_MASTER_PORT: 7077
+      SPARK_MASTER_WEBUI_PORT: 8080
+    volumes:
+      - ../data:/data
+      - ../src:/app
+    networks:
+      - wikimedia-network
 
   spark-streaming:
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile.spark
     depends_on:
       - kafka
     working_dir: /app
     volumes:
-      - ./src:/app/src:ro
-      - ./checkpoints:/app/checkpoints
-      - ./output:/app/output
+      - ../src:/app/src:ro
+      - ../checkpoints:/app/checkpoints
+      - ../output:/app/output
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC: wiki-events
@@ -62,3 +115,9 @@ services:
       --master local[*]
       /app/src/spark_streaming.py
     restart: unless-stopped
+    networks:
+      - wikimedia-network
+
+networks:
+  wikimedia-network:
+    driver: bridge
