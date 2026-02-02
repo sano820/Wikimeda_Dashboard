@@ -2,4 +2,8 @@ pandas==3.0.0
 python-dotenv==1.2.1
 requests==2.32.5
 confluent-kafka==2.3.0
+<<<<<<< Updated upstream
 kafka-python==2.0.2
+=======
+kafka-python
+>>>>>>> Stashed changes

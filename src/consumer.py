@@ -14,7 +14,7 @@ KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 TOPIC = os.getenv("KAFKA_TOPIC", "wiki-events")
 GROUP_ID = os.getenv("KAFKA_GROUP_ID", "wikimeda-consumer-group")
 
-OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/data")
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", "Wikimeda_Dashboard/data")
 OUTPUT_FILE = os.getenv("OUTPUT_FILE", "")  # 비우면 자동 파일명 생성
 
 
