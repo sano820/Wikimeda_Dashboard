@@ -8,3 +8,6 @@ data/*.parquet
 output/*.csv
 venv/
 output/
+
+data/
+docekr/data/
