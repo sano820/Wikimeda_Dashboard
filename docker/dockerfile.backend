@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 백엔드 코드 복사
+COPY backend /app/backend
+
+# 필요한 라이브러리만 설치
+RUN pip install --no-cache-dir fastapi uvicorn redis
+
+EXPOSE 8000
+
+CMD ["uvicorn", "backend.api_server:app", "--host", "0.0.0.0", "--port", "8000"]
