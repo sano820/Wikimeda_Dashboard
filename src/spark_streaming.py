@@ -185,8 +185,8 @@ if __name__ == "__main__":
     # 메시지 파싱
     parsed_df = parse_messages(kafka_df, schema)
 
-    # 역별 집계
-    station_agg = aggregate_by_station(parsed_df)
+    # 집계
+    station_agg = aggregate_by_wiki(parsed_df)
 
     # 콘솔 출력 (디버깅)
     console_query = write_to_console(station_agg, "complete")
